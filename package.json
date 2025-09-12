@@ -1,0 +1,26 @@
+{
+  "name": "stick-fighting-game",
+  "version": "1.0.0",
+  "description": "Multiplayer stick fighting game where players grow when they kill opponents",
+  "main": "server-multiplayer.js",
+  "scripts": {
+    "start": "node server-multiplayer.js",
+    "dev": "nodemon server-multiplayer.js",
+    "single": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "game",
+    "multiplayer",
+    "websocket",
+    "fighting",
+    "canvas"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

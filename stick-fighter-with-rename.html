@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STICK - Fighting Game with Rename</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #2a2a2a;
+            border-bottom: 1px solid #333;
+        }
+
+        .signin-btn {
+            background-color: #000;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b35, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .online-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4CAF50;
+            font-size: 14px;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+
+        .game-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        #gameCanvas {
+            border: 3px solid #000;
+            background-color: white;
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .minimap {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border: 2px solid #000;
+            background-color: #333;
+        }
+
+        #minimapCanvas {
+            display: block;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-left: 1px solid #333;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            flex: 1;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .control-btn:hover {
+            background-color: #357abd;
+        }
+
+        .rename-section {
+            background-color: #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rename-section h3 {
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+
+        .rename-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #444;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .rename-btn {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .rename-btn:hover {
+            background-color: #45a049;
+        }
+
+        .leaderboard {
+            background-color: #333;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .leaderboard-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #555;
+        }
+
+        .tab {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #ccc;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-size: 12px;
+        }
+
+        .tab.active {
+            color: #4CAF50;
+            border-bottom-color: #4CAF50;
+        }
+
+        .players-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+        }
+
+        .player-rank {
+            width: 20px;
+            height: 20px;
+            background-color: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            margin-right: 10px;
+        }
+
+        .player-name {
+            flex: 1;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .player-kd {
+            font-size: 12px;
+            color: #ccc;
+            margin-right: 10px;
+        }
+
+        .player-points {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        /* Footer */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #2a2a2a;
+            border-top: 1px solid #333;
+            height: 60px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .social-item:hover {
+            color: #4CAF50;
+        }
+
+        .contract-address {
+            color: #4CAF50;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        .music-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+
+        .mute-btn {
+            background-color: #000;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .volume-slider {
+            width: 100px;
+            height: 4px;
+            background-color: #333;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .volume-fill {
+            width: 100%;
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 2px;
+        }
+
+        /* Kill notification */
+        .kill-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: #ff6b35;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <button class="signin-btn">
+            <span class="x-icon">✕</span>
+            Sign in with X
+        </button>
+        <div class="logo">
+            <span class="logo-text">STICK</span>
+        </div>
+        <div class="online-count">
+            <span class="online-dot"></span>
+            <span id="playerCount">4 players online</span>
+        </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="main-content">
+        <div class="game-container">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="minimap">
+                <canvas id="minimapCanvas" width="100" height="100"></canvas>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <aside class="sidebar">
+            <div class="control-buttons">
+                <button class="control-btn" onclick="showControls()">
+                    <span class="gear-icon">⚙</span>
+                    Controls
+                </button>
+                <button class="control-btn" onclick="toggleFullscreen()">
+                    <span class="fullscreen-icon">⛶</span>
+                    Fullscreen
+                </button>
+            </div>
+
+            <!-- Rename Section -->
+            <div class="rename-section">
+                <h3>Rename Player</h3>
+                <input type="text" id="renameInput" class="rename-input" placeholder="Enter new name" maxlength="20">
+                <button class="rename-btn" onclick="renamePlayer()">Rename</button>
+            </div>
+
+            <div class="leaderboard">
+                <div class="leaderboard-header">
+                    <span class="trophy-icon">🏆</span>
+                    Top Players
+                </div>
+                <div class="tabs">
+                    <button class="tab active" data-tab="points" onclick="switchTab('points')">Points</button>
+                    <button class="tab" data-tab="kills" onclick="switchTab('kills')">Kills</button>
+                    <button class="tab" data-tab="streak" onclick="switchTab('streak')">Best Streak</button>
+                </div>
+                <div class="players-list" id="playersList">
+                    <!-- Players will be dynamically added here -->
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="social-links">
+            <div class="social-item">
+                <span class="discord-icon">🎮</span>
+                STICK DISCORD
+            </div>
+            <div class="social-item">
+                <span class="x-icon">✕</span>
+                STICK X
+            </div>
+        </div>
+        <div class="contract-address">
+            $STICK CA: ETi8mZ6RHUb6rzwyq62AshmXdEmiQ6S9YQcUyvxXbonk
+        </div>
+        <div class="music-controls">
+            <button class="mute-btn">
+                <span class="mute-icon">✕</span>
+                Mute Music
+            </button>
+            <div class="volume-slider">
+                <div class="volume-fill"></div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        class StickFighterWithRename {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.minimapCanvas = document.getElementById('minimapCanvas');
+                this.minimapCtx = this.minimapCanvas.getContext('2d');
+                
+                this.players = new Map();
+                this.currentPlayerId = 'player_' + Math.random().toString(36).substr(2, 9);
+                this.keys = {};
+                this.gameRunning = true;
+                this.attackEffects = [];
+                
+                // Game settings
+                this.mapWidth = 800;
+                this.mapHeight = 600;
+                this.playerSpeed = 3;
+                this.minPlayerSize = 20;
+                this.maxPlayerSize = 80;
+                this.attackRange = 50;
+                this.punchCooldown = 500;
+                this.kickCooldown = 800;
+                
+                this.init();
+            }
+            
+            init() {
+                // Create current player
+                this.addPlayer(this.currentPlayerId, 'Player#' + Math.random().toString(36).substr(2, 6));
+                
+                // Create 3 fixed bots
+                this.addPlayer('bot_1', 'Bot#1');
+                this.addPlayer('bot_2', 'Bot#2');
+                this.addPlayer('bot_3', 'Bot#3');
+                
+                this.setupEventListeners();
+                this.gameLoop();
+                this.updateLeaderboard();
+            }
+            
+            addPlayer(id, name) {
+                const player = {
+                    id: id,
+                    name: name,
+                    x: Math.random() * (this.mapWidth - 40) + 20,
+                    y: Math.random() * (this.mapHeight - 40) + 20,
+                    size: this.minPlayerSize,
+                    health: 100,
+                    maxHealth: 100,
+                    kills: 0,
+                    deaths: 0,
+                    points: 0,
+                    color: this.getRandomColor(),
+                    isBot: id.startsWith('bot_'),
+                    targetX: 0,
+                    targetY: 0,
+                    lastMoveTime: 0,
+                    lastPunch: 0,
+                    lastKick: 0,
+                    facing: 1,
+                    isAttacking: false,
+                    attackType: null,
+                    attackTimer: 0,
+                    aiState: 'wander',
+                    targetPlayer: null,
+                    lastAttackTime: 0
+                };
+                
+                this.players.set(id, player);
+                return player;
+            }
+            
+            getRandomColor() {
+                const colors = ['#ff6b35', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                    
+                    if (e.code === 'KeyJ') {
+                        this.handlePunch();
+                    }
+                    if (e.code === 'KeyK') {
+                        this.handleKick();
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.code] = false;
+                });
+            }
+            
+            handlePunch() {
+                const player = this.players.get(this.currentPlayerId);
+                if (!player) return;
+                
+                const now = Date.now();
+                if (now - player.lastPunch < this.punchCooldown) return;
+                
+                player.lastPunch = now;
+                player.isAttacking = true;
+                player.attackType = 'punch';
+                player.attackTimer = 300;
+                
+                this.createAttackEffect(player.x, player.y, 'punch');
+                this.checkAttack(player, 'punch');
+            }
+            
+            handleKick() {
+                const player = this.players.get(this.currentPlayerId);
+                if (!player) return;
+                
+                const now = Date.now();
+                if (now - player.lastKick < this.kickCooldown) return;
+                
+                player.lastKick = now;
+                player.isAttacking = true;
+                player.attackType = 'kick';
+                player.attackTimer = 400;
+                
+                this.createAttackEffect(player.x, player.y, 'kick');
+                this.checkAttack(player, 'kick');
+            }
+            
+            createAttackEffect(x, y, type) {
+                const effect = {
+                    x: x,
+                    y: y,
+                    type: type,
+                    timer: type === 'punch' ? 300 : 400,
+                    maxTimer: type === 'punch' ? 300 : 400
+                };
+                this.attackEffects.push(effect);
+            }
+            
+            checkAttack(attacker, attackType) {
+                const damage = attackType === 'punch' ? 25 : 35;
+                const range = attackType === 'punch' ? this.attackRange : this.attackRange + 10;
+                
+                for (let [id, target] of this.players) {
+                    if (id === attacker.id) continue;
+                    
+                    const dx = target.x - attacker.x;
+                    const dy = target.y - attacker.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < range) {
+                        this.hitPlayer(attacker, target, damage);
+                    }
+                }
+            }
+            
+            hitPlayer(attacker, target, damage) {
+                target.health -= damage;
+                
+                if (target.health <= 0) {
+                    this.killPlayer(attacker, target);
+                }
+            }
+            
+            updatePlayer(player) {
+                if (player.id === this.currentPlayerId) {
+                    this.updateHumanPlayer(player);
+                } else if (player.isBot) {
+                    this.updateBotPlayer(player);
+                }
+                
+                // Update attack timer
+                if (player.isAttacking) {
+                    player.attackTimer -= 16;
+                    if (player.attackTimer <= 0) {
+                        player.isAttacking = false;
+                        player.attackType = null;
+                    }
+                }
+            }
+            
+            updateHumanPlayer(player) {
+                let dx = 0, dy = 0;
+                
+                if (this.keys['KeyW'] || this.keys['ArrowUp']) dy -= this.playerSpeed;
+                if (this.keys['KeyS'] || this.keys['ArrowDown']) dy += this.playerSpeed;
+                if (this.keys['KeyA'] || this.keys['ArrowLeft']) {
+                    dx -= this.playerSpeed;
+                    player.facing = -1;
+                }
+                if (this.keys['KeyD'] || this.keys['ArrowRight']) {
+                    dx += this.playerSpeed;
+                    player.facing = 1;
+                }
+                
+                if (dx !== 0 && dy !== 0) {
+                    dx *= 0.707;
+                    dy *= 0.707;
+                }
+                
+                player.x += dx;
+                player.y += dy;
+                
+                player.x = Math.max(player.size/2, Math.min(this.mapWidth - player.size/2, player.x));
+                player.y = Math.max(player.size/2, Math.min(this.mapHeight - player.size/2, player.y));
+            }
+            
+            updateBotPlayer(player) {
+                const now = Date.now();
+                
+                // Find nearest enemy
+                let nearestEnemy = null;
+                let nearestDistance = Infinity;
+                
+                for (let [id, otherPlayer] of this.players) {
+                    if (id === player.id) continue;
+                    
+                    const dx = otherPlayer.x - player.x;
+                    const dy = otherPlayer.y - player.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        nearestEnemy = otherPlayer;
+                    }
+                }
+                
+                // AI State Machine
+                if (nearestEnemy) {
+                    const dx = nearestEnemy.x - player.x;
+                    const dy = nearestEnemy.y - player.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 60) {
+                        // Close enough to attack
+                        player.aiState = 'attack';
+                        player.targetPlayer = nearestEnemy;
+                        
+                        // Face the target
+                        player.facing = dx > 0 ? 1 : -1;
+                        
+                        // Attack if cooldown is ready
+                        if (now - player.lastAttackTime > 1000) {
+                            const attackType = Math.random() < 0.6 ? 'punch' : 'kick';
+                            this.botAttack(player, attackType);
+                            player.lastAttackTime = now;
+                        }
+                    } else {
+                        // Chase the enemy
+                        player.aiState = 'chase';
+                        player.targetPlayer = nearestEnemy;
+                        
+                        const moveX = (dx / distance) * this.playerSpeed * 0.8;
+                        const moveY = (dy / distance) * this.playerSpeed * 0.8;
+                        
+                        player.x += moveX;
+                        player.y += moveY;
+                        player.facing = dx > 0 ? 1 : -1;
+                    }
+                } else {
+                    // No enemies nearby, wander
+                    player.aiState = 'wander';
+                    
+                    if (now - player.lastMoveTime > 2000) {
+                        player.targetX = Math.random() * (this.mapWidth - 40) + 20;
+                        player.targetY = Math.random() * (this.mapHeight - 40) + 20;
+                        player.lastMoveTime = now;
+                    }
+                    
+                    const dx = player.targetX - player.x;
+                    const dy = player.targetY - player.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > 5) {
+                        const moveX = (dx / distance) * this.playerSpeed * 0.5;
+                        const moveY = (dy / distance) * this.playerSpeed * 0.5;
+                        
+                        player.x += moveX;
+                        player.y += moveY;
+                        player.facing = dx > 0 ? 1 : -1;
+                    }
+                }
+                
+                // Keep bot within bounds
+                player.x = Math.max(player.size/2, Math.min(this.mapWidth - player.size/2, player.x));
+                player.y = Math.max(player.size/2, Math.min(this.mapHeight - player.size/2, player.y));
+            }
+            
+            botAttack(player, attackType) {
+                const now = Date.now();
+                
+                if (attackType === 'punch' && now - player.lastPunch < this.punchCooldown) return;
+                if (attackType === 'kick' && now - player.lastKick < this.kickCooldown) return;
+                
+                if (attackType === 'punch') {
+                    player.lastPunch = now;
+                } else {
+                    player.lastKick = now;
+                }
+                
+                player.isAttacking = true;
+                player.attackType = attackType;
+                player.attackTimer = attackType === 'punch' ? 300 : 400;
+                
+                this.createAttackEffect(player.x, player.y, attackType);
+                this.checkAttack(player, attackType);
+            }
+            
+            killPlayer(killer, victim) {
+                killer.size = Math.min(this.maxPlayerSize, killer.size + 8);
+                killer.points += 10;
+                killer.kills++;
+                killer.health = Math.min(killer.maxHealth, killer.health + 30);
+                
+                victim.size = this.minPlayerSize;
+                victim.health = victim.maxHealth;
+                victim.deaths++;
+                victim.x = Math.random() * (this.mapWidth - 40) + 20;
+                victim.y = Math.random() * (this.mapHeight - 40) + 20;
+                
+                this.updateLeaderboard();
+                this.showKillNotification(killer.name, victim.name);
+            }
+            
+            showKillNotification(killer, victim) {
+                const notification = document.createElement('div');
+                notification.className = 'kill-notification';
+                notification.textContent = `${killer} killed ${victim}!`;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 2000);
+            }
+            
+            render() {
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillRect(0, 0, this.mapWidth, this.mapHeight);
+                
+                this.drawGrid();
+                
+                for (let [id, player] of this.players) {
+                    this.drawStickFigure(player);
+                }
+                
+                this.drawAttackEffects();
+                this.updateMinimap();
+            }
+            
+            drawGrid() {
+                this.ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+                this.ctx.lineWidth = 1;
+                
+                for (let x = 0; x < this.mapWidth; x += 20) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, this.mapHeight);
+                    this.ctx.stroke();
+                }
+                
+                for (let y = 0; y < this.mapHeight; y += 20) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(this.mapWidth, y);
+                    this.ctx.stroke();
+                }
+            }
+            
+            drawStickFigure(player) {
+                const scale = player.size / 20;
+                const x = player.x;
+                const y = player.y;
+                
+                this.ctx.save();
+                this.ctx.translate(x, y);
+                this.ctx.scale(scale, scale);
+                this.ctx.scale(player.facing, 1);
+                
+                this.ctx.strokeStyle = player.color;
+                this.ctx.fillStyle = player.color;
+                this.ctx.lineWidth = 3;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                
+                this.ctx.beginPath();
+                
+                // Head
+                this.ctx.arc(0, -8, 4, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Body
+                this.ctx.moveTo(0, -4);
+                this.ctx.lineTo(0, 6);
+                
+                // Arms
+                if (player.isAttacking && player.attackType === 'punch') {
+                    this.ctx.moveTo(0, -2);
+                    this.ctx.lineTo(10, 2);
+                    this.ctx.moveTo(0, -1);
+                    this.ctx.lineTo(-6, 3);
+                } else if (player.isAttacking && player.attackType === 'kick') {
+                    this.ctx.moveTo(0, -2);
+                    this.ctx.lineTo(8, 1);
+                    this.ctx.moveTo(0, -1);
+                    this.ctx.lineTo(-6, 3);
+                } else {
+                    this.ctx.moveTo(0, -2);
+                    this.ctx.lineTo(6, 1);
+                    this.ctx.moveTo(0, -1);
+                    this.ctx.lineTo(-6, 3);
+                }
+                
+                // Legs
+                if (player.isAttacking && player.attackType === 'kick') {
+                    this.ctx.moveTo(0, 6);
+                    this.ctx.lineTo(12, 10);
+                    this.ctx.moveTo(0, 6);
+                    this.ctx.lineTo(-4, 10);
+                } else {
+                    this.ctx.moveTo(0, 6);
+                    this.ctx.lineTo(4, 10);
+                    this.ctx.moveTo(0, 6);
+                    this.ctx.lineTo(-4, 10);
+                }
+                
+                this.ctx.stroke();
+                
+                // Eyes
+                this.ctx.fillStyle = '#000';
+                this.ctx.beginPath();
+                this.ctx.arc(-1, -9, 1, 0, Math.PI * 2);
+                this.ctx.arc(1, -9, 1, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.restore();
+                
+                // Player name
+                this.ctx.fillStyle = '#000';
+                this.ctx.font = 'bold 12px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(player.name, x, y - player.size / 2 - 8);
+                
+                // Health bar
+                const barWidth = 50;
+                const barHeight = 5;
+                const barX = x - barWidth / 2;
+                const barY = y - player.size / 2 - 20;
+                
+                this.ctx.fillStyle = '#333';
+                this.ctx.fillRect(barX, barY, barWidth, barHeight);
+                
+                const healthPercent = player.health / player.maxHealth;
+                this.ctx.fillStyle = healthPercent > 0.5 ? '#4CAF50' : healthPercent > 0.25 ? '#ff9800' : '#f44336';
+                this.ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+                
+                this.ctx.strokeStyle = '#000';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(barX, barY, barWidth, barHeight);
+            }
+            
+            drawAttackEffects() {
+                for (let i = this.attackEffects.length - 1; i >= 0; i--) {
+                    const effect = this.attackEffects[i];
+                    const progress = 1 - (effect.timer / effect.maxTimer);
+                    
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 1 - progress;
+                    
+                    if (effect.type === 'punch') {
+                        this.ctx.strokeStyle = '#ff6b35';
+                        this.ctx.lineWidth = 4;
+                        this.ctx.beginPath();
+                        this.ctx.arc(effect.x, effect.y, 35 * progress, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                        
+                        this.ctx.fillStyle = 'rgba(255, 107, 53, 0.3)';
+                        this.ctx.beginPath();
+                        this.ctx.arc(effect.x, effect.y, 25 * progress, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    } else if (effect.type === 'kick') {
+                        this.ctx.strokeStyle = '#ff6b35';
+                        this.ctx.lineWidth = 4;
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(effect.x, effect.y, 45 * progress, 25 * progress, 0, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                        
+                        this.ctx.fillStyle = 'rgba(255, 107, 53, 0.3)';
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(effect.x, effect.y, 35 * progress, 20 * progress, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    
+                    this.ctx.restore();
+                    
+                    effect.timer -= 16;
+                    if (effect.timer <= 0) {
+                        this.attackEffects.splice(i, 1);
+                    }
+                }
+            }
+            
+            updateMinimap() {
+                this.minimapCtx.fillStyle = '#333';
+                this.minimapCtx.fillRect(0, 0, 100, 100);
+                
+                const scaleX = 100 / this.mapWidth;
+                const scaleY = 100 / this.mapHeight;
+                
+                for (let [id, player] of this.players) {
+                    const x = player.x * scaleX;
+                    const y = player.y * scaleY;
+                    const size = Math.max(2, player.size * scaleX / 4);
+                    
+                    this.minimapCtx.fillStyle = player.id === this.currentPlayerId ? '#4CAF50' : '#ff6b35';
+                    this.minimapCtx.beginPath();
+                    this.minimapCtx.arc(x, y, size, 0, Math.PI * 2);
+                    this.minimapCtx.fill();
+                }
+            }
+            
+            updateLeaderboard() {
+                const playersList = document.getElementById('playersList');
+                const activeTab = document.querySelector('.tab.active').dataset.tab;
+                
+                const sortedPlayers = Array.from(this.players.values()).sort((a, b) => {
+                    switch (activeTab) {
+                        case 'kills':
+                            return b.kills - a.kills;
+                        case 'streak':
+                            return b.points - a.points;
+                        default:
+                            return b.points - a.points;
+                    }
+                });
+                
+                playersList.innerHTML = '';
+                
+                sortedPlayers.forEach((player, index) => {
+                    const playerItem = document.createElement('div');
+                    playerItem.className = 'player-item';
+                    
+                    const value = activeTab === 'kills' ? player.kills : 
+                                 activeTab === 'streak' ? player.points : player.points;
+                    
+                    playerItem.innerHTML = `
+                        <div class="player-rank">${index + 1}</div>
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-kd">K/D: ${player.kills}/${player.deaths}</div>
+                        <div class="player-points">${value}</div>
+                    `;
+                    
+                    playersList.appendChild(playerItem);
+                });
+                
+                document.getElementById('playerCount').textContent = `${this.players.size} player${this.players.size !== 1 ? 's' : ''} online`;
+            }
+            
+            gameLoop() {
+                if (!this.gameRunning) return;
+                
+                for (let [id, player] of this.players) {
+                    this.updatePlayer(player);
+                }
+                
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+
+        // Global functions
+        function showControls() {
+            alert('Controls:\nWASD - Move\nJ - Punch (damage: 25)\nK - Kick (damage: 35)\n\nRename: Type new name and click Rename!\nKill enemies to grow bigger and stronger!');
+        }
+
+        function toggleFullscreen() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                document.documentElement.requestFullscreen();
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            game.updateLeaderboard();
+        }
+
+        function renamePlayer() {
+            const newName = document.getElementById('renameInput').value.trim();
+            if (newName && newName.length > 0) {
+                const player = game.players.get(game.currentPlayerId);
+                if (player) {
+                    player.name = newName;
+                    game.updateLeaderboard();
+                    document.getElementById('renameInput').value = '';
+                    alert(`Player renamed to: ${newName}`);
+                }
+            } else {
+                alert('Please enter a valid name!');
+            }
+        }
+
+        // Initialize game
+        let game;
+        document.addEventListener('DOMContentLoaded', () => {
+            game = new StickFighterWithRename();
+        });
+    </script>
+</body>
+</html>
