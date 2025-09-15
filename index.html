@@ -114,48 +114,51 @@
 
         .ca-section {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
             background: rgba(0,0,0,0.8);
-            padding: 15px;
-            border-radius: 10px;
+            padding: 10px;
+            border-radius: 8px;
             color: white;
-            min-width: 250px;
+            min-width: 200px;
+            max-width: 220px;
             z-index: 1000;
         }
 
         .ca-title {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #ff6b35;
         }
 
         .ca-address {
-            font-size: 10px;
+            font-size: 9px;
             background: rgba(255,255,255,0.1);
-            padding: 8px;
-            border-radius: 5px;
-            margin-bottom: 10px;
+            padding: 6px;
+            border-radius: 4px;
+            margin-bottom: 8px;
             word-break: break-all;
             font-family: monospace;
         }
 
         .ca-links {
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 6px;
+            margin-bottom: 8px;
         }
 
         .ca-link {
             background: linear-gradient(45deg, #1da1f2, #00d4aa);
             color: white;
             text-decoration: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
             font-weight: bold;
             transition: all 0.3s;
+            flex: 1;
         }
 
         .ca-link:hover {
@@ -167,12 +170,13 @@
             background: linear-gradient(45deg, #ff6b35, #f7931e);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
             transition: all 0.3s;
+            font-size: 12px;
         }
 
         .buy-button:hover {
@@ -228,6 +232,7 @@
             background: rgba(255,255,255,0.1);
             padding: 15px;
             border-radius: 5px;
+            margin-bottom: 20px;
         }
 
         .player-item {
@@ -324,7 +329,7 @@
                 <strong>CA:</strong> 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
             </div>
             <div class="ca-links">
-                <a href="https://twitter.com/stickfighter" target="_blank" class="ca-link">🐦 Twitter</a>
+                <a href="https://x.com/stickfighter" target="_blank" class="ca-link">🐦 Twitter</a>
                 <a href="https://discord.gg/stickfighter" target="_blank" class="ca-link">💬 Discord</a>
             </div>
             <button class="buy-button" onclick="buyStickToken()">🛒 Buy $STICK</button>
@@ -366,6 +371,14 @@
                 <h3>Rename Player</h3>
                 <input type="text" id="renameInput" class="rename-input" placeholder="Enter new name" maxlength="20">
                 <button class="rename-btn" onclick="renamePlayer()">Rename</button>
+            </div>
+            
+            <!-- Players Online -->
+            <div class="leaderboard" style="margin-bottom: 20px;">
+                <h3>👥 Players Online</h3>
+                <div id="playerCount" style="font-size: 18px; color: #4CAF50; font-weight: bold;">
+                    21 players online
+                </div>
             </div>
             
             <!-- Leaderboard -->
@@ -506,6 +519,9 @@
         let keys = {};
         let gameRunning = true;
         let attackEffects = [];
+        let fakePlayerCount = 20;
+        let currentPlayerCount = 21;
+        let playerCountTimer = 0;
         
         // Camera system
         let cameraX = 0;
@@ -545,10 +561,10 @@
             // Create current player
             addPlayer(currentPlayerId, 'Player#' + Math.random().toString(36).substr(2, 6));
             
-            // Create 3 fixed bots
-            addPlayer('bot_1', 'Bot#1');
-            addPlayer('bot_2', 'Bot#2');
-            addPlayer('bot_3', 'Bot#3');
+            // Create 20 fake players with random names
+            for (let i = 1; i <= fakePlayerCount; i++) {
+                addPlayer('bot_' + i, getRandomName());
+            }
             
             setupEventListeners();
             gameLoop();
@@ -591,9 +607,29 @@
             return player;
         }
 
+        // Random names for fake players (like real players)
+        function generateRandomPlayerName() {
+            const prefixes = ['vm', 'xd', 'qt', 'zz', 'aa', 'bb', 'cc', 'dd', 'ee', 'ff', 'gg', 'hh', 'ii', 'jj', 'kk', 'll', 'mm', 'nn', 'oo', 'pp'];
+            const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+            const randomSuffix = Math.random().toString(36).substr(2, 6);
+            return `Player#${randomPrefix}${randomSuffix}`;
+        }
+
+        // More diverse colors for characters
+        const characterColors = [
+            '#ff6b35', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff',
+            '#ff4757', '#2ed573', '#ffa502', '#ff6348', '#ff3838', '#ff9f1a', '#ff6b6b',
+            '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd',
+            '#00d2d3', '#ff9ff3', '#54a0ff', '#ff6b35', '#4ecdc4', '#45b7d1', '#96ceb4',
+            '#feca57', '#ff9ff3', '#54a0ff', '#ff4757', '#2ed573', '#ffa502', '#ff6348'
+        ];
+
         function getRandomColor() {
-            const colors = ['#ff6b35', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
-            return colors[Math.floor(Math.random() * colors.length)];
+            return characterColors[Math.floor(Math.random() * characterColors.length)];
+        }
+
+        function getRandomName() {
+            return generateRandomPlayerName();
         }
 
         function setupEventListeners() {
@@ -855,44 +891,8 @@
         }
 
         function showKillNotification(killer, victim) {
-            // Create skull icon
-            const skullIcon = document.createElement('div');
-            skullIcon.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 60px;
-                z-index: 1000;
-                animation: skullBounce 1.5s ease-out;
-                pointer-events: none;
-            `;
-            skullIcon.textContent = '💀';
-            
-            // Add skull animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes skullBounce {
-                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(0deg); }
-                    20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(10deg); }
-                    40% { transform: translate(-50%, -50%) scale(0.9) rotate(-5deg); }
-                    60% { transform: translate(-50%, -50%) scale(1.1) rotate(3deg); }
-                    80% { transform: translate(-50%, -50%) scale(0.95) rotate(-1deg); }
-                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8) rotate(0deg); }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            document.body.appendChild(skullIcon);
-            
-            setTimeout(() => {
-                if (document.body.contains(skullIcon)) {
-                    document.body.removeChild(skullIcon);
-                }
-                if (document.head.contains(style)) {
-                    document.head.removeChild(style);
-                }
-            }, 1500);
+            // Simple kill notification without skull effect
+            console.log(`${killer} killed ${victim}!`);
         }
 
         function render() {
@@ -961,9 +961,9 @@
             ctx.fillStyle = 'rgba(0,0,0,0.2)';
             ctx.fillRect(-3, 8, 6, 2);
             
-            // Simple 2D stickman - one color
+            // Simple 2D stickman with player color
             ctx.strokeStyle = '#000';
-            ctx.fillStyle = '#4ecdc4'; // Light blue
+            ctx.fillStyle = player.color; // Use player's assigned color
             ctx.lineWidth = 4;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -1012,8 +1012,8 @@
             
             ctx.stroke();
             
-            // Simple armband on right arm
-            ctx.fillStyle = '#ff6b35'; // Orange
+            // Simple armband on right arm with player color
+            ctx.fillStyle = player.color; // Use player's color
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -1109,8 +1109,12 @@
 
         function updateLeaderboard() {
             const playersList = document.getElementById('playersList');
+            const playerCountElement = document.getElementById('playerCount');
             
             const sortedPlayers = Array.from(players.values()).sort((a, b) => b.points - a.points);
+            
+            // Update player count with dynamic changes
+            playerCountElement.textContent = `${currentPlayerCount} players online`;
             
             playersList.innerHTML = '';
             
@@ -1127,6 +1131,24 @@
                 playersList.appendChild(playerItem);
             });
         }
+        
+        function updatePlayerCount() {
+            playerCountTimer++;
+            
+            // Change player count every 3-8 seconds
+            if (playerCountTimer > 180 + Math.random() * 300) {
+                playerCountTimer = 0;
+                
+                // Random change between -4 to +4 players
+                const change = Math.floor(Math.random() * 9) - 4;
+                const newCount = Math.max(15, Math.min(25, currentPlayerCount + change));
+                
+                if (newCount !== currentPlayerCount) {
+                    currentPlayerCount = newCount;
+                    updateLeaderboard();
+                }
+            }
+        }
 
         function gameLoop() {
             if (!gameRunning) return;
@@ -1134,6 +1156,9 @@
             for (let [id, player] of players) {
                 updatePlayer(player);
             }
+            
+            // Update dynamic player count
+            updatePlayerCount();
             
             render();
             requestAnimationFrame(gameLoop);
@@ -1251,18 +1276,13 @@
 
         // Buy $STICK Token function
         function buyStickToken() {
-            if (!wallet || !publicKey) {
-                alert('Please connect your wallet first!');
-                return;
-            }
-            
             const tokenAddress = '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
-            const dexUrl = `https://jup.ag/swap/SOL-${tokenAddress}`;
+            const pumpUrl = `https://pump.fun/coin/${tokenAddress}`;
             
-            // Open Jupiter DEX for swapping
-            window.open(dexUrl, '_blank');
+            // Open pump.fun for buying
+            window.open(pumpUrl, '_blank');
             
-            console.log('Opening Jupiter DEX for $STICK token purchase');
+            console.log('Opening pump.fun for $STICK token purchase');
         }
 
         // Enhanced kill function with blockchain rewards
