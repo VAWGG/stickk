@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$STICK Token - CA Section</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ca-section {
+            background: rgba(0,0,0,0.8);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+            min-width: 300px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 2px solid #ff6b35;
+        }
+
+        .ca-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ff6b35;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .ca-address {
+            font-size: 12px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #333;
+        }
+
+        .ca-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .ca-link {
+            background: linear-gradient(45deg, #1da1f2, #00d4aa);
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(29, 161, 242, 0.3);
+        }
+
+        .ca-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(29, 161, 242, 0.5);
+        }
+
+        .buy-button {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .buy-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.5);
+        }
+
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .token-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .token-info h4 {
+            margin: 0 0 10px 0;
+            color: #ff6b35;
+        }
+
+        .token-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="ca-section">
+        <div class="ca-title">💰 $STICK Token</div>
+        
+        <div class="ca-address">
+            <strong>Contract Address:</strong><br>
+            <span id="contractAddress">7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU</span>
+            <br>
+            <button class="copy-btn" onclick="copyAddress()">📋 Copy CA</button>
+        </div>
+        
+        <div class="ca-links">
+            <a href="https://twitter.com/stickfighter" target="_blank" class="ca-link">🐦 Twitter</a>
+            <a href="https://discord.gg/stickfighter" target="_blank" class="ca-link">💬 Discord</a>
+        </div>
+        
+        <button class="buy-button" onclick="buyStickToken()">🛒 Buy $STICK</button>
+        
+        <div class="token-info">
+            <h4>📊 Token Info</h4>
+            <p><strong>Symbol:</strong> $STICK</p>
+            <p><strong>Network:</strong> Solana</p>
+            <p><strong>Type:</strong> SPL Token</p>
+            <p><strong>DEX:</strong> Jupiter Aggregator</p>
+        </div>
+    </div>
+
+    <script>
+        // Copy contract address to clipboard
+        function copyAddress() {
+            const address = document.getElementById('contractAddress').textContent;
+            navigator.clipboard.writeText(address).then(() => {
+                alert('Contract address copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = address;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Contract address copied to clipboard!');
+            });
+        }
+
+        // Buy $STICK Token function
+        function buyStickToken() {
+            const tokenAddress = '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
+            const dexUrl = `https://jup.ag/swap/SOL-${tokenAddress}`;
+            
+            // Open Jupiter DEX for swapping
+            window.open(dexUrl, '_blank');
+            
+            console.log('Opening Jupiter DEX for $STICK token purchase');
+        }
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const section = document.querySelector('.ca-section');
+            
+            // Add hover effect to the entire section
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

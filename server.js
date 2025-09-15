@@ -204,6 +204,7 @@ class GameServer {
                 this.killPlayer(attacker, target);
             }
         }
+
     }
     
     killPlayer(killer, victim) {
